@@ -1,2 +1,2 @@
 # RadioactiveDecay
-Calculate ans plot the radioactive decay for different nuclids
+Calculate and plot the radioactive decay for different nuclids
