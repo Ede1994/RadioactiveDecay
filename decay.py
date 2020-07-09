@@ -10,6 +10,16 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
+# nuclides dictionary with half life in s
+nuclides = {
+		"C-10": 19.29,
+		"F-18": 6.586*10**3
+		}
+
+print(nuclides)
+for key in nuclides:
+	print(key)
+
 # definition decay constant factor
 def decay_const(t):
 	# λ = ln(2) / t (half)
@@ -22,6 +32,7 @@ def decay_equation(a0,c,t):
 	# A = A0 * e^(- λ * t)
 	a = int(a0 * math.exp(-c * t))
 	return a
+
 
 # set and convert start time
 date = input('Enter the start time (d/m/Y H:M:S): ')
@@ -43,10 +54,18 @@ print('Elapsed Time: {} s'.format(elapsed_time))
 # set starting activity
 activity = float(input('Starting activity in Bq: '))
 
+# set up nuclid (user)
+nuclid_input = input('Nuclid (e.g. F-18): ')
+
+
+for key in nuclides:
+	if nuclid_input == key:
+		nuclid = key
+		half_life = nuclides.get(key)
 
 # nuclid and half life
-nuclid = 'Carbon-10'
-half_life = 19.29 # carbon-10
+#nuclid = 'Carbon-10'
+#half_life = 19.29 # carbon-10
 
 
 # print all relevant infos
@@ -90,7 +109,7 @@ ax.annotate('You are here!',
             #horizontalalignment='left',
             #verticalalignment='bottom',
             )
-plt.title('Radioactive Decay')
+plt.title('Nuclid: {}, Half life: {} s, Activity: {} Bq'.format(nuclid, half_life, activity))
 plt.xlabel('Time (s)')
 plt.ylabel('Activity (Bq)')
 plt.show()
