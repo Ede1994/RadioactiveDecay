@@ -9,15 +9,16 @@ import math
 import time
 from datetime import datetime
 import matplotlib.pyplot as plt
+import matplotlib.image as mpimg
 
 
 # nuclides dictionary with half life in s
 nuclides = {
-        "O-15": 122.24,
-        "N-13": 597.9,
-		"Tc-99m": 21.624*10**3,
-        "I-131": 693*10**3,
-		"F-18": 6.586*10**3
+        "O-15": [122.24, "Img/o15.png"],
+        "N-13": [597.9, "Img/n13.png"],
+		"Tc-99m": [21.624*10**3, "Img/tc99m.png"],
+        "I-131": [693*10**3, "Img/i131.png"],
+		"F-18": [6.586*10**3, "Img/f18.png"]
 		}
 
 
@@ -36,15 +37,24 @@ def decay_equation(a0,c,t):
 	return a
 
 
+# print a list of all nuclides
+list_nuclides = []
+for key in nuclides:
+	list_nuclides.append(key)
+
+print('All available nuclides:', list_nuclides)
+
+
 # set up nuclid (user input)
 nuclid_input = input('Nuclid (e.g. F-18): ')
 
 
-# compare user input with nuclides dict
+# compare user input with nuclides dict and extract correct half life and img path
 for key in nuclides:
 	if nuclid_input == key:
 		nuclid = key
-		half_life = nuclides.get(key)
+		half_life = float(nuclides[key][0])
+		img_path = str(nuclides[key][1])
 
 
 # set starting activity
@@ -65,7 +75,6 @@ end_time = time.mktime(d.timetuple())
 
 # calculate the elapsed time
 elapsed_time = end_time - start_time
-# print('Elapsed Time: {} s'.format(elapsed_time))
 
 
 # print all relevant infos
@@ -119,3 +128,10 @@ plt.title('Nuclid: {}, Half life: {} s, Activity: {} Bq'.format(nuclid, half_lif
 plt.xlabel('Time (s)')
 plt.ylabel('Activity (Bq)')
 plt.show()
+
+# show decay scheme
+img=mpimg.imread(img_path)
+imgplot = plt.imshow(img)
+plt.show()
+
+
