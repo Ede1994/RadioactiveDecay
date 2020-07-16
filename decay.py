@@ -14,11 +14,20 @@ import matplotlib.image as mpimg
 
 # nuclides dictionary with half life in s
 nuclides = {
+		"C-11": [1224.0, "Img/c11.png"],
+		"N-13": [597.9, "Img/n13.png"],
         "O-15": [122.24, "Img/o15.png"],
-        "N-13": [597.9, "Img/n13.png"],
+        "F-18": [6.586*10**3, "Img/f18.png"],
+		"Cu-62": [582, "Img/cu62.png"],
+		"Cu-64": [45721.1, "Img/cu64.png"],
+		"Ga-68": [4080, "Img/ga68.png"],
+		"Ge-68": [2.376*10**7, "Img/ge68.png"],
+		"Br-76": [58700, "Img/br76.png"],
+		"Rb-82": [75, "Img/rb82.png"],
+		"Zr-89": [4704*60, "Img/zr89.png"],
 		"Tc-99m": [21.624*10**3, "Img/tc99m.png"],
-        "I-131": [693*10**3, "Img/i131.png"],
-		"F-18": [6.586*10**3, "Img/f18.png"]
+        "I-124": [6013.44*60, "Img/i124.png"],
+		"I-131": [693*10**3, "Img/i131.png"]
 		}
 
 
