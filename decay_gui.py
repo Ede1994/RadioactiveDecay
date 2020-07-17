@@ -53,12 +53,16 @@ def decay_equation(a0,c,t):
 # functions: GUI
 def donothing():
     filewin = tk.Toplevel(root)
-    button = tk.Button(filewin, text="Do nothing button")
+    button = tk.Button(filewin,
+                       text="Do nothing button"
+                       )
     button.pack()
 
 def impressum():
     filewin = tk.Toplevel(root)
-    button = tk.Button(filewin, text="Impressum: \n Author: Eric Einspänner \n (Institute of Nuclear Medicine, UMG (Germany)) \n This program is free software.")
+    button = tk.Button(filewin,
+                       text="Impressum: \nAuthor: Eric Einspänner \n (Institute of Nuclear Medicine, UMG (Germany)) \n This program is free software."
+                       )
     button.pack()
 
 def buttonCalculate():
@@ -104,30 +108,31 @@ def buttonCalculate():
     # list with 1st, 2nd and 3rd half life for timesteps in plot
     half_life_timesteps = [half_life, half_life*2, half_life*3]
 	
-	# plot graph of activity depends on time
-    fig = plt.figure()
-    ax = fig.add_subplot(111)
-    line, = ax.plot(tlist, alist, color='#ee8d18', lw=2)
 
+ 	# plot graph of activity depends on time
+    fig = plt.figure()
+    ax = fig.add_subplot(221)
+    line, = ax.plot(tlist, alist, color='#ee8d18', lw=2)
+ 
     # plot half life timesteps
     for xcoord in half_life_timesteps:
         plt.axvline(x = xcoord, color='red', linestyle='--', linewidth='0.33')
-
+ 
     # plot single point (elapsed time)
     ax.plot([elapsed_time], [activity_elapsed_time], 'o')
     ax.annotate('You are here!',
             xy=(elapsed_time, activity_elapsed_time),
             )
-
+ 
     # set up labeling
     plt.title('Nuclid: {}, Half life: {} s, Activity: {} Bq'.format(nuclid, half_life, activity))
     plt.xlabel('Time (s)')
     plt.ylabel('Activity (Bq)')
-    plt.show()
-
+ 
     # show decay scheme
+    ax2 = fig.add_subplot(222)
     img=mpimg.imread(img_path)
-    imgplot = plt.imshow(img)
+    ax2 = plt.imshow(img)
     plt.show()
 
     # results
@@ -137,7 +142,7 @@ def buttonCalculate():
 
 root = tk.Tk()
 root.title("Radioactive Decay")
-root.geometry("1000x700")
+root.geometry("700x300")
 
 # define menu
 menubar = tk.Menu(root)
@@ -178,33 +183,24 @@ label2 = tk.Label(root, text="Activity in Bq (e.g. 100):").grid(row=0, column=3)
 label3 = tk.Label(root, text="Starting Time (d/m/Y H:M:S):").grid(row=1)
 label4 = tk.Label(root, text="Ending Time (d/m/Y H:M:S):").grid(row=1, column=3)
 label5 = tk.Label(root, text="Elapsed Time (s):").grid(row=3)
-label6 = tk.Label(root, bg='gray', width='12', text="").grid(row=3, column=1)
+label6 = tk.Label(root, bg='gray', width='12', text="")
+label6.grid(row=3, column=1)
 label7 = tk.Label(root, text="Ending activity (Bq):").grid(row=3, column=3)
-label8 = tk.Label(root, bg='gray', width='12', text="").grid(row=3, column=4)
+label8 = tk.Label(root, bg='gray', width='12', text="")
+label8.grid(row=3, column=4)
 
 # define entries for user input
-e1 = tk.Entry(root).grid(row=0, column=1)
-e2 = tk.Entry(root).grid(row=0, column=4)
-e3 = tk.Entry(root).grid(row=1, column=1)
-e4 = tk.Entry(root).grid(row=1, column=4)
+e1 = tk.Entry(root)
+e1.grid(row=0, column=1)
+e2 = tk.Entry(root)
+e2.grid(row=0, column=4)
+e3 = tk.Entry(root)
+e3.grid(row=1, column=1)
+e4 = tk.Entry(root)
+e4.grid(row=1, column=4)
 
 # define button position
-buttonStart = tk.Button(text='Calculate!', width='6', bg='red', command=buttonCalculate)
+buttonStart = tk.Button(text='Calculate!', width='10', bg='red', command=buttonCalculate)
 buttonStart.grid(row=1, column=5, padx='5', pady='5')
-
-# image, radioactive decay
-image1 = Image.open("/home/eric/Dokumente/PythonProjects/RadioactiveDecay/Img/f18.png")
-image1 = image1.resize((250, 250))
-image1 = ImageTk.PhotoImage(image1)
-panel1 = tk.Label(root, image = image1)
-panel1.grid(row=2, column=0, columnspan=2, rowspan=1)
-
-# image, decay scheme
-image2 = Image.open("/home/eric/Dokumente/PythonProjects/RadioactiveDecay/Img/f18.png")
-image2 = image2.resize((250, 250))
-image2 = ImageTk.PhotoImage(image2)
-panel2 = tk.Label(root, image = image2)
-panel2.grid(row=2, column=3, columnspan=2, rowspan=1)
-
 
 root.mainloop()
