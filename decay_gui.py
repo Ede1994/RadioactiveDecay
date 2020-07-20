@@ -58,6 +58,11 @@ def donothing():
                        )
     button.pack()
 
+def currentTime():
+    now = datetime.now()
+    dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
+    e4.insert(10,dt_string)
+
 def impressum():
     filewin = tk.Toplevel(root)
     button = tk.Button(filewin,
@@ -201,6 +206,9 @@ e4.grid(row=1, column=4)
 
 # define button position
 buttonStart = tk.Button(text='Calculate!', width='10', bg='red', command=buttonCalculate)
-buttonStart.grid(row=1, column=5, padx='5', pady='5')
+buttonStart.grid(row=2, column=5, padx='5', pady='5')
+
+buttonTime = tk.Button(text='Time', width='10', bg='yellow', command=currentTime)
+buttonTime.grid(row=1, column=5, padx='5', pady='5')
 
 root.mainloop()
