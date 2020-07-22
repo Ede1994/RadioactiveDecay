@@ -7,7 +7,6 @@ Created on Mon Jul 13 11:40:43 2020
 """
 
 import tkinter as tk
-from PIL import Image, ImageTk
 
 import math
 import time
@@ -51,6 +50,7 @@ def decay_equation(a0,c,t):
 	return a
 
 # functions: GUI
+# do nothing button
 def donothing():
     filewin = tk.Toplevel(root)
     button = tk.Button(filewin,
@@ -58,11 +58,21 @@ def donothing():
                        )
     button.pack()
 
+# function for current time button
 def currentTime():
     now = datetime.now()
     dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
     e4.insert(10,dt_string)
 
+# text for impressum button
+def helpButton():
+    filewin = tk.Toplevel(root)
+    button = tk.Button(filewin,
+                       text="Possible nuclides: C-11, N-13, O-15, F-18, Cu-62, Cu-64, Ga-68, Ge-68, Br-76, Rb-82, Zr-89, Tc-99m, I-124, I-125, I-131"
+                       )
+    button.pack()
+
+# text for impressum button
 def impressum():
     filewin = tk.Toplevel(root)
     button = tk.Button(filewin,
@@ -72,14 +82,29 @@ def impressum():
 
 def buttonCalculate():
     # get the values
+	# nuclid
     nuclid_input = e1.get()
-    activity = float(e2.get())
+    if nuclid_input == '':
+	    print('Error: No nuclid choosen!')
+	# activity
+    activity = e2.get()
+    if activity == '':
+	    print('Error: No activity choosen!')
+    else:
+	    activity = float(activity)
+	# starting time
     date = e3.get()
+    if date == '':
+	    print('Error: No starting time choosen!')
     d = datetime.strptime(date, "%d/%m/%Y %H:%M:%S")
     start_time = time.mktime(d.timetuple())
+	# ending time
     date = e4.get()
+    if date == '':
+	    print('Error: No ending time choosen!')
     d = datetime.strptime(date, "%d/%m/%Y %H:%M:%S")
     end_time = time.mktime(d.timetuple())
+    
 
     # processing of the data
     for key in nuclides:
@@ -145,38 +170,35 @@ def buttonCalculate():
     label8.config(text=str(activity_elapsed_time))
 
 
+# start GUI
 root = tk.Tk()
 root.title("Radioactive Decay")
-root.geometry("700x300")
+root.geometry("1000x300")
 
 # define menu
 menubar = tk.Menu(root)
 
+# file menu
 filemenu = tk.Menu(menubar, tearoff=0)
-filemenu.add_command(label="New", command=donothing)
-filemenu.add_command(label="Open", command=donothing)
 filemenu.add_command(label="Save", command=donothing)
 filemenu.add_command(label="Save as...", command=donothing)
 filemenu.add_command(label="Close", command=donothing)
-
 filemenu.add_separator()
-
 filemenu.add_command(label="Exit", command=root.quit)
 menubar.add_cascade(label="File", menu=filemenu)
+
+# edit menu
 editmenu = tk.Menu(menubar, tearoff=0)
-editmenu.add_command(label="Undo", command=donothing)
-
-editmenu.add_separator()
-
 editmenu.add_command(label="Cut", command=donothing)
 editmenu.add_command(label="Copy", command=donothing)
 editmenu.add_command(label="Paste", command=donothing)
 editmenu.add_command(label="Delete", command=donothing)
 editmenu.add_command(label="Select All", command=donothing)
-
 menubar.add_cascade(label="Edit", menu=editmenu)
+
+# help menu
 helpmenu = tk.Menu(menubar, tearoff=0)
-helpmenu.add_command(label="Help Index", command=donothing)
+helpmenu.add_command(label="Help Index", command=helpButton)
 helpmenu.add_command(label="Impressum", command=impressum)
 menubar.add_cascade(label="Help", menu=helpmenu)
 
@@ -205,8 +227,8 @@ e4 = tk.Entry(root)
 e4.grid(row=1, column=4)
 
 # define button position
-buttonStart = tk.Button(text='Calculate!', width='10', bg='red', command=buttonCalculate)
-buttonStart.grid(row=2, column=5, padx='5', pady='5')
+buttonCalculate = tk.Button(text='Calculate!', width='10', bg='red', command=buttonCalculate)
+buttonCalculate.grid(row=3, column=5, padx='5', pady='5')
 
 buttonTime = tk.Button(text='Time', width='10', bg='yellow', command=currentTime)
 buttonTime.grid(row=1, column=5, padx='5', pady='5')
