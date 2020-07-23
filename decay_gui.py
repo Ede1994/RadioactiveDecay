@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Mon Jul 13 11:40:43 2020
+Author: Eric Einspänner, Institute of Nuclear Medicine, UMG (Germany)
 
-@author: eric
+This program is free software.
 """
 
 import tkinter as tk
@@ -49,6 +49,14 @@ def decay_equation(a0,c,t):
 	a = int(a0 * math.exp(-c * t))
 	return a
 
+# Convert seconds to H:M:S
+def format_seconds_to_hms(s):
+    h= s // (60*60)
+    s %= (60*60)
+    m = s // 60
+    s %= 60
+    return "%02i:%02i:%02i" % (h, m, s)
+
 # functions: GUI
 # do nothing button
 def donothing():
@@ -67,16 +75,18 @@ def currentTime():
 # text for impressum button
 def helpButton():
     filewin = tk.Toplevel(root)
+    filewin.title("Help")
     button = tk.Button(filewin,
-                       text="Possible nuclides: C-11, N-13, O-15, F-18, Cu-62, Cu-64, Ga-68, Ge-68, Br-76, Rb-82, Zr-89, Tc-99m, I-124, I-125, I-131"
+                       text='''Possible nuclides: C-11, N-13, O-15, F-18, Cu-62, Cu-64, Ga-68, Ge-68, Br-76, Rb-82, Zr-89, Tc-99m, I-124, I-125, I-131'''
                        )
     button.pack()
 
 # text for impressum button
 def impressum():
     filewin = tk.Toplevel(root)
+    filewin.title("Impressum")
     button = tk.Button(filewin,
-                       text="Impressum: \nAuthor: Eric Einspänner \n (Institute of Nuclear Medicine, UMG (Germany)) \n This program is free software."
+                       text='''Author: Eric Einspänner \n (Institute of Nuclear Medicine, UMG (Germany)) \n This program is free software. \n eric.einspaenner@med.uni-goettingen.de'''
                        )
     button.pack()
 
@@ -85,23 +95,35 @@ def buttonCalculate():
 	# nuclid
     nuclid_input = e1.get()
     if nuclid_input == '':
-	    print('Error: No nuclid choosen!')
+	    tk.messagebox.showerror(
+            "Missing Nuclid",
+            "Error: No nuclid choosen!"
+        )
 	# activity
     activity = e2.get()
     if activity == '':
-	    print('Error: No activity choosen!')
+	    tk.messagebox.showerror(
+            "Missing Activity",
+            "Error: No activity choosen!"
+        )
     else:
 	    activity = float(activity)
 	# starting time
     date = e3.get()
     if date == '':
-	    print('Error: No starting time choosen!')
+	    tk.messagebox.showerror(
+            "Missing Starting Time",
+            "Error: No starting time choosen!"
+        )
     d = datetime.strptime(date, "%d/%m/%Y %H:%M:%S")
     start_time = time.mktime(d.timetuple())
 	# ending time
     date = e4.get()
     if date == '':
-	    print('Error: No ending time choosen!')
+	    tk.messagebox.showerror(
+            "Missing Ending Time",
+            "Error: No ending time choosen!"
+        )
     d = datetime.strptime(date, "%d/%m/%Y %H:%M:%S")
     end_time = time.mktime(d.timetuple())
     
@@ -114,6 +136,7 @@ def buttonCalculate():
 	       img_path = str(nuclides[key][1])
 
     elapsed_time = end_time - start_time
+    elapsed_time_hms = format_seconds_to_hms(elapsed_time)
 	
     activity_elapsed_time = decay_equation(activity, decay_const(half_life), elapsed_time)
     
@@ -166,7 +189,7 @@ def buttonCalculate():
     plt.show()
 
     # results
-    label6.config(text=str(elapsed_time))
+    label6.config(text=str(elapsed_time_hms))
     label8.config(text=str(activity_elapsed_time))
 
 
@@ -180,7 +203,6 @@ menubar = tk.Menu(root)
 
 # file menu
 filemenu = tk.Menu(menubar, tearoff=0)
-filemenu.add_command(label="Save", command=donothing)
 filemenu.add_command(label="Save as...", command=donothing)
 filemenu.add_command(label="Close", command=donothing)
 filemenu.add_separator()
@@ -189,10 +211,7 @@ menubar.add_cascade(label="File", menu=filemenu)
 
 # edit menu
 editmenu = tk.Menu(menubar, tearoff=0)
-editmenu.add_command(label="Cut", command=donothing)
-editmenu.add_command(label="Copy", command=donothing)
-editmenu.add_command(label="Paste", command=donothing)
-editmenu.add_command(label="Delete", command=donothing)
+editmenu.add_command(label="Delete All", command=donothing)
 editmenu.add_command(label="Select All", command=donothing)
 menubar.add_cascade(label="Edit", menu=editmenu)
 
@@ -209,7 +228,7 @@ label1 = tk.Label(root, text="Nuclid (e.g. F-18):").grid(row=0)
 label2 = tk.Label(root, text="Activity in Bq (e.g. 100):").grid(row=0, column=3)
 label3 = tk.Label(root, text="Starting Time (d/m/Y H:M:S):").grid(row=1)
 label4 = tk.Label(root, text="Ending Time (d/m/Y H:M:S):").grid(row=1, column=3)
-label5 = tk.Label(root, text="Elapsed Time (s):").grid(row=3)
+label5 = tk.Label(root, text="Elapsed Time (H:M:S):").grid(row=3)
 label6 = tk.Label(root, bg='gray', width='12', text="")
 label6.grid(row=3, column=1)
 label7 = tk.Label(root, text="Ending activity (Bq):").grid(row=3, column=3)
