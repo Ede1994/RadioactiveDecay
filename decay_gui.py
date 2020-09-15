@@ -11,10 +11,12 @@ import tkinter as tk
 import math
 import time
 from datetime import datetime
-import matplotlib.pyplot as plt
+
 import matplotlib.image as mpimg
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from matplotlib.figure import Figure
 
-
+#%% dictionary for nuclides and templates
 # nuclides dictionary with half life in s
 nuclides = {
 		"C-11": [1224.0, "Img/c11.png"],
@@ -35,6 +37,7 @@ nuclides = {
 		}
 
 
+#%% functions
 # functions: decay
 # definition decay constant factor
 def decay_const(t):
@@ -49,15 +52,54 @@ def decay_equation(a0,c,t):
 	a = int(a0 * math.exp(-c * t))
 	return a
 
+
+# activity plot
+def activity_plot(tlist, alist, half_life_timesteps, elapsed_time, activity_elapsed_time, nuclid, half_life, activity):
+    fig = Figure(figsize=(5, 4), dpi=60)
+    a = fig.add_subplot(111)
+
+    a.plot(tlist, alist, color='#ee8d18', lw=2)
+
+    # plot half life timesteps
+    for xcoord in half_life_timesteps:
+        a.axvline(x = xcoord, color='red', linestyle='--', linewidth='0.33')
+
+    # plot single point (elapsed time)
+    a.plot([elapsed_time], [activity_elapsed_time], 'o')
+    a.annotate('You are here!',
+            xy=(elapsed_time, activity_elapsed_time),
+            )
+
+    a.set_title ('Nuclid: {}, Half life: {} s, Activity: {} Bq'.format(nuclid, half_life, activity))
+    a.set_ylabel('Activity (Bq)', fontsize=14)
+    a.set_xlabel('Time (s)', fontsize=14)
+    return fig
+
+
+# plot image
+def img_plot(img_path):
+    # show decay scheme
+    fig = Figure(figsize=(5, 4), dpi=60)
+
+    ax2 = fig.add_subplot(111)
+    img = mpimg.imread(img_path)
+    ax2.imshow(img)
+    
+    return fig
+
+
 # Convert seconds to H:M:S
 def format_seconds_to_hms(s):
-    h= s // (60*60)
+    h = s // (60*60)
     s %= (60*60)
     m = s // 60
     s %= 60
     return "%02i:%02i:%02i" % (h, m, s)
 
+
+#%% buttons for GUI
 # functions: GUI
+
 # do nothing button
 def donothing():
     filewin = tk.Toplevel(root)
@@ -66,30 +108,47 @@ def donothing():
                        )
     button.pack()
 
+
 # function for current time button
 def currentTime():
     now = datetime.now()
     dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
+    e3.insert(10,dt_string)
     e4.insert(10,dt_string)
+
 
 # text for impressum button
 def helpButton():
     filewin = tk.Toplevel(root)
     filewin.title("Help")
-    button = tk.Button(filewin,
-                       text='''Possible nuclides: C-11, N-13, O-15, F-18, Cu-62, Cu-64, Ga-68, Ge-68, Br-76, Rb-82, Zr-89, Tc-99m, I-124, I-125, I-131'''
-                       )
-    button.pack()
+    S = tk.Scrollbar(filewin)
+    T = tk.Text(filewin, height=10, width=100)
+    S.pack(side=tk.RIGHT , fill=tk.Y)
+    T.pack(side=tk.LEFT, fill=tk.Y)
+    S.config(command=T.yview)
+    T.config(yscrollcommand=S.set)
+    quote= '''Possible nuclides: 
+C-11, N-13, O-15, F-18, Cu-62, Cu-64, Ga-68, Ge-68, Br-76, Rb-82, Zr-89, Tc-99m, I-124, I-125, I-131'''
+    T.insert(tk.END, quote)
+
 
 # text for impressum button
 def impressum():
     filewin = tk.Toplevel(root)
     filewin.title("Impressum")
-    button = tk.Button(filewin,
-                       text='''Author: Eric Einspänner \n (Institute of Nuclear Medicine, UMG (Germany)) \n This program is free software. \n eric.einspaenner@med.uni-goettingen.de'''
-                       )
-    button.pack()
+    S = tk.Scrollbar(filewin)
+    T = tk.Text(filewin, height=10, width=100)
+    S.pack(side=tk.RIGHT , fill=tk.Y)
+    T.pack(side=tk.LEFT, fill=tk.Y)
+    S.config(command=T.yview)
+    T.config(yscrollcommand=S.set)
+    quote= '''Author: Eric Einspänner (Institute of Nuclear Medicine, UMG (Germany))
+This program is free software.
+eric.einspaenner@med.uni-goettingen.de'''
+    T.insert(tk.END, quote)
 
+
+# calculation button
 def buttonCalculate():
     # get the values
 	# nuclid
@@ -135,11 +194,14 @@ def buttonCalculate():
 	       half_life = float(nuclides[key][0])
 	       img_path = str(nuclides[key][1])
 
+
     elapsed_time = end_time - start_time
     elapsed_time_hms = format_seconds_to_hms(elapsed_time)
+
 	
     activity_elapsed_time = decay_equation(activity, decay_const(half_life), elapsed_time)
-    
+ 
+
 	# set up loop
     dt = 1
     t = 0.0
@@ -160,43 +222,30 @@ def buttonCalculate():
 
     # list with 1st, 2nd and 3rd half life for timesteps in plot
     half_life_timesteps = [half_life, half_life*2, half_life*3]
-	
 
- 	# plot graph of activity depends on time
-    fig = plt.figure()
-    ax = fig.add_subplot(221)
-    line, = ax.plot(tlist, alist, color='#ee8d18', lw=2)
- 
-    # plot half life timesteps
-    for xcoord in half_life_timesteps:
-        plt.axvline(x = xcoord, color='red', linestyle='--', linewidth='0.33')
- 
-    # plot single point (elapsed time)
-    ax.plot([elapsed_time], [activity_elapsed_time], 'o')
-    ax.annotate('You are here!',
-            xy=(elapsed_time, activity_elapsed_time),
-            )
- 
-    # set up labeling
-    plt.title('Nuclid: {}, Half life: {} s, Activity: {} Bq'.format(nuclid, half_life, activity))
-    plt.xlabel('Time (s)')
-    plt.ylabel('Activity (Bq)')
- 
-    # show decay scheme
-    ax2 = fig.add_subplot(222)
-    img=mpimg.imread(img_path)
-    ax2 = plt.imshow(img)
-    plt.show()
+    # call plot
+    fig = activity_plot(tlist, alist, half_life_timesteps, elapsed_time, activity_elapsed_time, nuclid, half_life, activity)
+    # A tk.DrawingArea.
+    canvas = FigureCanvasTkAgg(fig, master=root)
+    canvas.draw()
+    canvas.get_tk_widget().grid(row=0, column=6, rowspan=5, columnspan=3, sticky=tk.W + tk.E + tk.N + tk.S, padx=1, pady=1)
+
+    # call img plot    
+    fig2 = img_plot(img_path)
+    canvas = FigureCanvasTkAgg(fig2, master=root)
+    canvas.draw()
+    canvas.get_tk_widget().grid(row=6, column=6, rowspan=5, columnspan=3, sticky=tk.W + tk.E + tk.N + tk.S, padx=1, pady=1)
 
     # results
     label6.config(text=str(elapsed_time_hms))
     label8.config(text=str(activity_elapsed_time))
 
 
+#%% GUI
 # start GUI
 root = tk.Tk()
 root.title("Radioactive Decay")
-root.geometry("1000x300")
+root.geometry("1920x1080")
 
 # define menu
 menubar = tk.Menu(root)
@@ -251,5 +300,12 @@ buttonCalculate.grid(row=3, column=5, padx='5', pady='5')
 
 buttonTime = tk.Button(text='Time', width='10', bg='yellow', command=currentTime)
 buttonTime.grid(row=1, column=5, padx='5', pady='5')
+
+# plot area
+plot_frame = tk.Frame(width=500, height=400, bg="grey", colormap="new")
+plot_frame.grid(row=0, column=6, rowspan=5, columnspan=3, sticky=tk.W + tk.E + tk.N + tk.S, padx=1, pady=1)
+
+plot_frame2 = tk.Frame(width=500, height=400, bg="grey", colormap="new")
+plot_frame2.grid(row=6, column=6, rowspan=5, columnspan=3, sticky=tk.W + tk.E + tk.N + tk.S, padx=1, pady=1)
 
 root.mainloop()
