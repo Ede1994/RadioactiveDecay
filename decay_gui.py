@@ -1,12 +1,15 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
+Copyright 2020
+
 Author: Eric Einspänner, Institute of Nuclear Medicine, UMG (Germany)
 
 This program is free software.
 """
 
 import tkinter as tk
+from tkinter import ttk
 
 import math
 import time
@@ -17,6 +20,15 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
 
 #%% dictionary for nuclides and templates
+# empty (template) lists
+
+
+# for activity (calculation)
+alist = []
+# for time (calculation)
+tlist = []
+
+
 # nuclides dictionary with half life in s
 nuclides = {
 		"C-11": [1224.0, "Img/c11.png"],
@@ -37,8 +49,15 @@ nuclides = {
 		}
 
 
+# list of nuclides
+nuclides_list = []
+for key in nuclides:
+    nuclides_list.append(key)
+
+
 #%% functions
-# functions: decay
+
+
 # definition decay constant factor
 def decay_const(t):
 	# λ = ln(2) / t (half)
@@ -109,12 +128,20 @@ def donothing():
     button.pack()
 
 
+# delete all entries (entry boxes)
+def delete_entries():
+    cb_nuclid.delete(0, tk.END)
+    entry_activity.delete(0, tk.END)
+    entry_startingTime.delete(0, tk.END)
+    entry_endingTime.delete(0, tk.END)
+
+
 # function for current time button
 def currentTime():
     now = datetime.now()
     dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
-    e3.insert(10,dt_string)
-    e4.insert(10,dt_string)
+    entry_startingTime.insert(10,dt_string)
+    entry_endingTime.insert(10,dt_string)
 
 
 # text for impressum button
@@ -128,7 +155,12 @@ def helpButton():
     S.config(command=T.yview)
     T.config(yscrollcommand=S.set)
     quote= '''Possible nuclides: 
-C-11, N-13, O-15, F-18, Cu-62, Cu-64, Ga-68, Ge-68, Br-76, Rb-82, Zr-89, Tc-99m, I-124, I-125, I-131'''
+C-11, N-13, O-15, F-18, Cu-62, Cu-64, Ga-68, Ge-68, Br-76, Rb-82, Zr-89, Tc-99m, I-124, I-125, I-131
+- Choose a nuclid (e.g. F-18)
+- Define the start activity in Bq (e.g. 100)
+- Define the starting date and time, format: d/m/Y H:M:S (e.g. 01/01/2020 10:00:00)
+Tip: Press the "Time" Button!
+- Define the ending date and time, format: d/m/Y H:M:S (e.g. 01/01/2020 10:50:00)'''
     T.insert(tk.END, quote)
 
 
@@ -151,15 +183,17 @@ eric.einspaenner@med.uni-goettingen.de'''
 # calculation button
 def buttonCalculate():
     # get the values
+
 	# nuclid
-    nuclid_input = e1.get()
+    nuclid_input = cb_nuclid.get()
     if nuclid_input == '':
 	    tk.messagebox.showerror(
             "Missing Nuclid",
             "Error: No nuclid choosen!"
         )
+
 	# activity
-    activity = e2.get()
+    activity = entry_activity.get()
     if activity == '':
 	    tk.messagebox.showerror(
             "Missing Activity",
@@ -167,8 +201,9 @@ def buttonCalculate():
         )
     else:
 	    activity = float(activity)
+
 	# starting time
-    date = e3.get()
+    date = entry_startingTime.get()
     if date == '':
 	    tk.messagebox.showerror(
             "Missing Starting Time",
@@ -176,8 +211,9 @@ def buttonCalculate():
         )
     d = datetime.strptime(date, "%d/%m/%Y %H:%M:%S")
     start_time = time.mktime(d.timetuple())
+
 	# ending time
-    date = e4.get()
+    date = entry_endingTime.get()
     if date == '':
 	    tk.messagebox.showerror(
             "Missing Ending Time",
@@ -188,29 +224,36 @@ def buttonCalculate():
     
 
     # processing of the data
+    # select nuclid specific half-life time
     for key in nuclides:
 	    if nuclid_input == key:
 	       nuclid = key
 	       half_life = float(nuclides[key][0])
 	       img_path = str(nuclides[key][1])
 
-
+    # calculate elapsed time (in s and H:M:S)
     elapsed_time = end_time - start_time
     elapsed_time_hms = format_seconds_to_hms(elapsed_time)
 
-	
+
+    # Note (for user) that elapsed time is negative
+    if elapsed_time < 0:
+	    tk.messagebox.showerror(
+            "Negative elapsed time!",
+            "Ignore time-activity plot!"
+        )
+
+
+	# calculate remaining activity
     activity_elapsed_time = decay_equation(activity, decay_const(half_life), elapsed_time)
  
 
+    # calculation for activity-time plot
 	# set up loop
     dt = 1
     t = 0.0
 
-    alist = []
-    tlist = []
-
-
-    # while loop until quadruple half life achieved
+    # while-loop until quadruple half life achieved
     while t < (half_life * 4):
 	    a = decay_equation(activity, decay_const(half_life), t)
 
@@ -219,26 +262,29 @@ def buttonCalculate():
 	
 	    t += dt
 
-
     # list with 1st, 2nd and 3rd half life for timesteps in plot
     half_life_timesteps = [half_life, half_life*2, half_life*3]
 
-    # call plot
+
+    # call activity plot
     fig = activity_plot(tlist, alist, half_life_timesteps, elapsed_time, activity_elapsed_time, nuclid, half_life, activity)
     # A tk.DrawingArea.
     canvas = FigureCanvasTkAgg(fig, master=root)
     canvas.draw()
     canvas.get_tk_widget().grid(row=0, column=6, rowspan=5, columnspan=3, sticky=tk.W + tk.E + tk.N + tk.S, padx=1, pady=1)
 
+
     # call img plot    
     fig2 = img_plot(img_path)
+    # A tk.DrawingArea.
     canvas = FigureCanvasTkAgg(fig2, master=root)
     canvas.draw()
     canvas.get_tk_widget().grid(row=6, column=6, rowspan=5, columnspan=3, sticky=tk.W + tk.E + tk.N + tk.S, padx=1, pady=1)
 
-    # results
-    label6.config(text=str(elapsed_time_hms))
-    label8.config(text=str(activity_elapsed_time))
+
+    # results; add in label areas
+    label_areaElapsedTime.config(text=str(elapsed_time_hms))
+    label_areaEndingActivity.config(text=str(activity_elapsed_time))
 
 
 #%% GUI
@@ -253,15 +299,13 @@ menubar = tk.Menu(root)
 # file menu
 filemenu = tk.Menu(menubar, tearoff=0)
 filemenu.add_command(label="Save as...", command=donothing)
-filemenu.add_command(label="Close", command=donothing)
 filemenu.add_separator()
 filemenu.add_command(label="Exit", command=root.quit)
 menubar.add_cascade(label="File", menu=filemenu)
 
 # edit menu
 editmenu = tk.Menu(menubar, tearoff=0)
-editmenu.add_command(label="Delete All", command=donothing)
-editmenu.add_command(label="Select All", command=donothing)
+editmenu.add_command(label="Delete All", command=delete_entries)
 menubar.add_cascade(label="Edit", menu=editmenu)
 
 # help menu
@@ -273,26 +317,28 @@ menubar.add_cascade(label="Help", menu=helpmenu)
 root.config(menu=menubar)
 
 # define labels for nuclid and activity
-label1 = tk.Label(root, text="Nuclid (e.g. F-18):").grid(row=0)
-label2 = tk.Label(root, text="Activity in Bq (e.g. 100):").grid(row=0, column=3)
-label3 = tk.Label(root, text="Starting Time (d/m/Y H:M:S):").grid(row=1)
-label4 = tk.Label(root, text="Ending Time (d/m/Y H:M:S):").grid(row=1, column=3)
-label5 = tk.Label(root, text="Elapsed Time (H:M:S):").grid(row=3)
-label6 = tk.Label(root, bg='gray', width='12', text="")
-label6.grid(row=3, column=1)
-label7 = tk.Label(root, text="Ending activity (Bq):").grid(row=3, column=3)
-label8 = tk.Label(root, bg='gray', width='12', text="")
-label8.grid(row=3, column=4)
+label_nuclid = tk.Label(root, text="Nuclid (e.g. F-18):").grid(row=0)
+label_activity = tk.Label(root, text="Activity in Bq (e.g. 100):").grid(row=0, column=3)
+label_startingTime = tk.Label(root, text="Starting Time (d/m/Y H:M:S):").grid(row=1)
+label_endingTime = tk.Label(root, text="Ending Time (d/m/Y H:M:S):").grid(row=1, column=3)
+label_elapsedTime = tk.Label(root, text="Elapsed Time (H:M:S):").grid(row=3)
+label_areaElapsedTime = tk.Label(root, bg='gray', width='12', text="")
+label_areaElapsedTime.grid(row=3, column=1)
+label_endingActivity = tk.Label(root, text="Ending activity (Bq):").grid(row=3, column=3)
+label_areaEndingActivity = tk.Label(root, bg='gray', width='12', text="")
+label_areaEndingActivity.grid(row=3, column=4)
 
 # define entries for user input
-e1 = tk.Entry(root)
-e1.grid(row=0, column=1)
-e2 = tk.Entry(root)
-e2.grid(row=0, column=4)
-e3 = tk.Entry(root)
-e3.grid(row=1, column=1)
-e4 = tk.Entry(root)
-e4.grid(row=1, column=4)
+# combobox (drop-down menu) tkinter for nuclide selection
+cb_nuclid = ttk.Combobox(root, values=nuclides_list)
+cb_nuclid.grid(row=0, column=1)
+entry_activity = tk.Entry(root)
+entry_activity.grid(row=0, column=4)
+entry_startingTime = tk.Entry(root)
+entry_startingTime.grid(row=1, column=1)
+entry_endingTime = tk.Entry(root)
+entry_endingTime.grid(row=1, column=4)
+
 
 # define button position
 buttonCalculate = tk.Button(text='Calculate!', width='10', bg='red', command=buttonCalculate)
@@ -301,7 +347,7 @@ buttonCalculate.grid(row=3, column=5, padx='5', pady='5')
 buttonTime = tk.Button(text='Time', width='10', bg='yellow', command=currentTime)
 buttonTime.grid(row=1, column=5, padx='5', pady='5')
 
-# plot area
+# plot areas
 plot_frame = tk.Frame(width=500, height=400, bg="grey", colormap="new")
 plot_frame.grid(row=0, column=6, rowspan=5, columnspan=3, sticky=tk.W + tk.E + tk.N + tk.S, padx=1, pady=1)
 
