@@ -47,7 +47,7 @@ def decay_equation(a0,c,t):
 	return a
 
 
-# print a list of all nuclides
+#%% print a list of all nuclides
 list_nuclides = []
 for key in nuclides:
 	list_nuclides.append(key)
