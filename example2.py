@@ -10,7 +10,7 @@ atom_x = np.tile(np.arange(0.5,40.5,1),25)
 atom_y = np.repeat(np.arange(0.5,25.5,1),40)
 filelabels = ['00','01','02','03','04','05','06','07','08','09','10','11','12']
 
-
+#%%
 seqno = 1
 atom_cols = np.array(['purple']*1000)
 plt.figure(figsize=(16,6))
@@ -102,6 +102,9 @@ for seqno in range(2,10):
     
 #%% 2 different half lives simulation
 
+half_life1 = 4
+half_life2 = 12
+
 atom_cols=np.array(['purple']*1000)
 atom2_cols=np.array(['green']*1000)
 plt.figure(figsize=(16,12))
@@ -109,10 +112,11 @@ ax1=plt.subplot(2,2,1)
 plt.scatter(atom_x, atom_y, color=atom_cols, s=40)
 plt.title("On formation: 1000 unstable parent atoms, 0 decayed daughter atoms", fontsize=12, y=0.99) 
 plt.axis('off')
+
 ax2=plt.subplot(2,2,2)
-plt.xlim(-0.28,16.28)
-plt.xticks(range(17))
-plt.xlabel('Number of half-lives since formation', fontsize=12)
+plt.xlim(-0.28,16)
+plt.xticks(range(16))
+plt.xlabel('Number of timesteps', fontsize=12)
 plt.ylim(-50,1050)
 plt.ylabel('Number of atoms', fontsize=12)
 half_lives=[0]
@@ -121,15 +125,17 @@ daughters=[0]
 plt.scatter(half_lives,parents,s=200,color='purple', edgecolor='black', label='parent',zorder=4)
 plt.scatter(half_lives,daughters,s=200,color='0.6', edgecolor='black', label='daughter',zorder=6)
 plt.legend(loc=7,fontsize=12)
+
 ax3=plt.subplot(2,2,3)
 plt.scatter(atom_x,atom_y,color=atom2_cols,s=40)
 plt.title("On formation: 1000 unstable parent atoms, 0 decayed daughter atoms", fontsize=12, y=0.99) 
 plt.axis('off')
 plt.tight_layout()
+
 ax4=plt.subplot(2,2,4)
-plt.xlim(-0.07,4.07)
-plt.xticks(range(5))
-plt.xlabel('Number of half-lives since formation', fontsize=12)
+plt.xlim(-0.07,16)
+plt.xticks(range(16))
+plt.xlabel('Number of timesteps', fontsize=12)
 plt.ylim(-50,1050)
 plt.ylabel('Number of atoms', fontsize=12)
 half_lives2=[0]
@@ -140,33 +146,32 @@ plt.scatter(half_lives2,daughters2,s=200,color='0.8', edgecolor='black', label='
 plt.legend(loc=7,fontsize=12)
 plt.tight_layout()
 
-plt.savefig('tmp/DualDecay'+'-0.png',dpi=100)
-
-half_life1=1
-half_life2=4
+plt.savefig('tmp/DualDecay'+'-0.png', dpi=100)
 
 for hl in range(1,17):
     for i in np.where(atom_cols=='purple')[0]:
-        if np.random.rand()>np.exp(-0.693*1/half_life1): atom_cols[i]='0.6'
+        if np.random.rand() > np.exp(-0.693*1/half_life1):
+            atom_cols[i]='0.6'
     ax1.scatter(atom_x,atom_y,color=atom_cols,s=42)
     daughter=len(np.where(atom_cols=='0.6')[0])
     half_lives.append(hl)
     daughters.append(daughter)
     parents.append(1000-daughter)
-    ax1.set_title("After "+ str(hl) +" half-lives: "+ str(1000-daughter) +" unstable parent atoms, "+ str(daughter) + " decayed daughter atoms", fontsize=12, y=0.99)
+    ax1.set_title("After "+ str(hl) +" timesteps: "+ str(1000-daughter) +" unstable parent atoms, "+ str(daughter) + " decayed daughter atoms", fontsize=12, y=0.99)
     ax2.scatter(half_lives,parents,s=200,edgecolor='black',color='purple',zorder=4)
     ax2.scatter(half_lives,daughters,s=200,edgecolor='black',color='0.6',zorder=6)
     ax2.plot(half_lives,parents,linewidth=2,color='purple',zorder=3)
     ax2.plot(half_lives,daughters,linewidth=2,color='0.6',zorder=5)
     
     for i in np.where(atom2_cols=='green')[0]:
-        if np.random.rand()>np.exp(-0.693*1/half_life2): atom2_cols[i]='0.8'
+        if np.random.rand() > np.exp(-0.693*1/half_life2):
+            atom2_cols[i]='0.8'
     ax3.scatter(atom_x,atom_y,color=atom2_cols,s=42)
     daughter2=len(np.where(atom2_cols=='0.8')[0])
-    half_lives2.append(hl/4.)
+    half_lives2.append(hl)
     daughters2.append(daughter2)
     parents2.append(1000-daughter2)
-    ax3.set_title("After " + str(hl/4.) + " half-lives: " + str(1000-daughter2) + " unstable parent atoms, " + str(daughter2) + " decayed daughter atoms", fontsize=12, y=0.99)
+    ax3.set_title("After " + str(hl) + " timesteps: " + str(1000-daughter2) + " unstable parent atoms, " + str(daughter2) + " decayed daughter atoms", fontsize=12, y=0.99)
     ax4.scatter(half_lives2,parents2,s=200,edgecolor='black',color='green',zorder=4)
     ax4.scatter(half_lives2,daughters2,s=200,edgecolor='black',color='0.8',zorder=6)
     ax4.plot(half_lives2,parents2,linewidth=2,color='green',zorder=3)
